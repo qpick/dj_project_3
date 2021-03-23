@@ -57,8 +57,6 @@ function send_email() {
         })
         .then(response => response.json())
         .then(result => {
-            // Print result
-            console.log(result);
             load_mailbox('sent')
         });
 
@@ -75,24 +73,27 @@ function get_emails_for_mailbox(mailbox) {
             emails.forEach(email => {
                 let email_container = document.createElement('div')
                 let email_div = document.createElement('div')
+                email_div.setAttribute('onclick', 'get_single_email(' + email.id + ')')
 
                 let email_sender = '<p>From: ' + email.sender +'</p>'
                 let email_subject = '<p>Subject: ' + email.subject + '</p>'
                 let email_timestamp = '<p>Date: ' + email.timestamp + '</p>'
                 let email_recipients = '<p>To: ' + email.recipients + '</p>'
+                let button_to_archive_or_unarchive = create_button_to_archive_or_unarchive(email)
 
                 if (mailbox === 'inbox') {
-                    email_div.innerHTML = email_subject+ email_sender + email_timestamp
+                    email_div.innerHTML = email_sender + email_subject + email_timestamp
+                    email_container.innerHTML = button_to_archive_or_unarchive
+                    email_container.className += ' background-gray '
                 } else if(mailbox === 'sent') {
                     email_div.innerHTML = email_subject + email_recipients + email_timestamp
+                } else if(mailbox === 'archive') {
+                    email_div.innerHTML = email_sender + email_subject + email_timestamp
+                    email_container.innerHTML = button_to_archive_or_unarchive
                 }
 
                 email_container.id = 'email_container_id_' + email.id
-                email_container.setAttribute('onclick', 'get_single_email(' + email.id + ')')
-                email_container.className = 'col-12 mt-2 main_email_div card email_container'
-                if (mailbox === 'inbox'){
-                    email_container.className += email.read ? ' background-gray' : ''
-                }
+                email_container.className += ' col-12 mt-2 main_email_div card email_container '
 
                 email_container.append(email_div)
                 main_div.append(email_container)
@@ -103,6 +104,14 @@ function get_emails_for_mailbox(mailbox) {
             emails_view.append(main_div)
 
         });
+}
+
+function create_button_to_archive_or_unarchive(email) {
+        let button_text = email.archived ? 'Send to Inbox' : 'Send to Archive'
+
+        return '<div class="text-right">'
+            + '<button class="btn btn-info" onclick="make_email_archived_unarchived(' + email.id + ',' + email.archived + ')">'
+            + button_text + '</button></div>'
 }
 
 function get_single_email(email_id) {
@@ -131,4 +140,18 @@ function make_email_read(email_id) {
           read: true
         })
     })
+}
+
+function make_email_archived_unarchived(email_id, archived) {
+
+    fetch('/emails/' + email_id, {
+        method: 'PUT',
+        body: JSON.stringify({
+          archived: !archived
+        })
+    })
+      .then(result => {
+            load_mailbox('inbox')
+      })
+
 }
