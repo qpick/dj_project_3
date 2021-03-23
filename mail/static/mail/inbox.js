@@ -20,6 +20,7 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#display-email').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -33,6 +34,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#display-email').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -44,9 +46,6 @@ function send_email() {
     let recipients = document.querySelector('#compose-recipients').value
     let subject = document.querySelector('#compose-subject').value
     let body = document.querySelector('#compose-body').value
-    console.log('recipients are: ', recipients)
-    console.log('subject is: ', subject)
-    console.log('body is: ', body)
 
     fetch('/emails', {
             method: 'POST',
@@ -74,15 +73,13 @@ function get_emails_for_mailbox(mailbox) {
             main_div.className = 'row'
 
             emails.forEach(email => {
-                console.log('email is: ', email)
-                email_container = document.createElement('div')
-                email_link = document.createElement('a')
-                email_div = document.createElement('div')
+                let email_container = document.createElement('div')
+                let email_div = document.createElement('div')
 
-                email_sender = '<p>From: ' + email.sender +'</p>'
-                email_subject = '<p>Subject: ' + email.subject + '</p>'
-                email_timestamp = '<p>Date: ' + email.timestamp + '</p>'
-                email_recipients = '<p>To: ' + email.recipients + '</p>'
+                let email_sender = '<p>From: ' + email.sender +'</p>'
+                let email_subject = '<p>Subject: ' + email.subject + '</p>'
+                let email_timestamp = '<p>Date: ' + email.timestamp + '</p>'
+                let email_recipients = '<p>To: ' + email.recipients + '</p>'
 
                 if (mailbox === 'inbox') {
                     email_div.innerHTML = email_subject+ email_sender + email_timestamp
@@ -90,43 +87,48 @@ function get_emails_for_mailbox(mailbox) {
                     email_div.innerHTML = email_subject + email_recipients + email_timestamp
                 }
 
-                email_link = document.createElement('a')
-                email_link.href = 'javascript:void(0)'
-                email_link.append(email_div)
-
                 email_container.id = 'email_container_id_' + email.id
-                email_container.className = 'col-12 mt-2 main_email_div card'
-                email_container.className += email.read === 'true' ? ' background-gray' : ' background-yellow'
-                email_container.append(email_link)
+                email_container.setAttribute('onclick', 'get_single_email(' + email.id + ')')
+                email_container.className = 'col-12 mt-2 main_email_div card email_container'
+                if (mailbox === 'inbox'){
+                    email_container.className += email.read ? ' background-gray' : ''
+                }
 
+                email_container.append(email_div)
                 main_div.append(email_container)
 
             })
 
-            emails_view = document.querySelector('#emails-view')
+            let emails_view = document.querySelector('#emails-view')
             emails_view.append(main_div)
 
         });
 }
 
-function get_single_email() {
+function get_single_email(email_id) {
 
-    fetch('/emails/100')
+    fetch('/emails/' + email_id)
         .then(response => response.json())
         .then(email => {
-            // Print email
-            console.log(email);
+            make_email_read(email_id)
 
-            // ... do something else with email ...
+            document.querySelector('#emails-view').style.display = 'none';
+            document.querySelector('#display-email').style.display = 'block';
+
+            document.querySelector('#display-email-sender').innerHTML = 'From ' + email.sender
+            document.querySelector('#display-email-recipients').innerHTML = 'To ' + email.recipients
+            document.querySelector('#display-email-subject').innerHTML = 'Subject: ' + email.subject
+            document.querySelector('#display-email-timestamp').innerHTML = 'Date: ' + email.timestamp
+            document.querySelector('#display-email-body').innerHTML = email.body
         });
 }
 
-function make_email_read_archived() {
+function make_email_read(email_id) {
 
-    fetch('/emails/100', {
+    fetch('/emails/' + email_id, {
         method: 'PUT',
         body: JSON.stringify({
-          archived: true
+          read: true
         })
     })
 }

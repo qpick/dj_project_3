@@ -11,6 +11,6 @@ textarea {
     background: gray;
 }
 
-.background-yellow {
-    background: yellow;
+.email_container:hover {
+    cursor: pointer;
 }

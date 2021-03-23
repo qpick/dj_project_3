@@ -31,6 +31,30 @@
             <input id="submit-compose-form" type="submit" class="btn btn-primary"/>
         </form>
     </div>
+
+    <div id="display-email">
+        <div class="text-right">
+            <button type="button" id="reply-to-email-button" class="btn btn-primary">Reply</button>
+        </div>
+        <div class="row mt-3">
+            <div class="col-6 text-left">
+                <div id="display-email-sender"></div>
+            </div>
+            <div class="col-6 text-right">
+                <div id="display-email-timestamp"></div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div id="display-email-recipients" class="col-12"></div>
+        </div>
+        <div class="row">
+            <div id="display-email-subject" class="col-12"></div>
+        </div>
+        <div class="card">
+            <textarea id="display-email-body" class="card-body" cols="20" rows="20"></textarea>
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}
