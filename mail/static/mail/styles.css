@@ -1,3 +1,16 @@
 textarea {
     min-height: 400px;
 }
+
+.main_email_div a {
+    text-decoration: none;
+    color: rgb(33, 37, 41);
+}
+
+.background-gray {
+    background: gray;
+}
+
+.background-yellow {
+    background: yellow;
+}

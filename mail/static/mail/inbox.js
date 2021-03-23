@@ -10,8 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 
   document.querySelector('#submit-compose-form').addEventListener('click', (e) => {
-    e.preventDefault()
-//    console.log('here submit-compose-form')
+    e.preventDefault();
     send_email()
 })
 
@@ -37,6 +36,8 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  get_emails_for_mailbox(mailbox)
 }
 
 function send_email() {
@@ -59,19 +60,52 @@ function send_email() {
         .then(result => {
             // Print result
             console.log(result);
-            load_mailbox()
+            load_mailbox('sent')
         });
 
 }
 
-function get_emails_for_inbox_page() {
-    fetch('/emails/inbox')
+function get_emails_for_mailbox(mailbox) {
+    fetch('/emails/' + mailbox)
         .then(response => response.json())
         .then(emails => {
-            // Print emails
-            console.log(emails);
+            let main_div = document.createElement('div')
+            main_div.id = 'main_div_id'
+            main_div.className = 'row'
 
-            // ... do something else with emails ...
+            emails.forEach(email => {
+                console.log('email is: ', email)
+                email_container = document.createElement('div')
+                email_link = document.createElement('a')
+                email_div = document.createElement('div')
+
+                email_sender = '<p>From: ' + email.sender +'</p>'
+                email_subject = '<p>Subject: ' + email.subject + '</p>'
+                email_timestamp = '<p>Date: ' + email.timestamp + '</p>'
+                email_recipients = '<p>To: ' + email.recipients + '</p>'
+
+                if (mailbox === 'inbox') {
+                    email_div.innerHTML = email_subject+ email_sender + email_timestamp
+                } else if(mailbox === 'sent') {
+                    email_div.innerHTML = email_subject + email_recipients + email_timestamp
+                }
+
+                email_link = document.createElement('a')
+                email_link.href = 'javascript:void(0)'
+                email_link.append(email_div)
+
+                email_container.id = 'email_container_id_' + email.id
+                email_container.className = 'col-12 mt-2 main_email_div card'
+                email_container.className += email.read === 'true' ? ' background-gray' : ' background-yellow'
+                email_container.append(email_link)
+
+                main_div.append(email_container)
+
+            })
+
+            emails_view = document.querySelector('#emails-view')
+            emails_view.append(main_div)
+
         });
 }
 
