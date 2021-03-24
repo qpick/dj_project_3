@@ -67,51 +67,57 @@ function get_emails_for_mailbox(mailbox) {
         .then(response => response.json())
         .then(emails => {
             let main_div = document.createElement('div')
-            main_div.id = 'main_div_id'
-            main_div.className = 'row'
-
             emails.forEach(email => {
-                let email_container = document.createElement('div')
-                let email_div = document.createElement('div')
-                email_div.setAttribute('onclick', 'get_single_email(' + email.id + ')')
-
-                let email_sender = '<p>From: ' + email.sender +'</p>'
-                let email_subject = '<p>Subject: ' + email.subject + '</p>'
-                let email_timestamp = '<p>Date: ' + email.timestamp + '</p>'
-                let email_recipients = '<p>To: ' + email.recipients + '</p>'
-                let button_to_archive_or_unarchive = create_button_to_archive_or_unarchive(email)
-
-                if (mailbox === 'inbox') {
-                    email_div.innerHTML = email_sender + email_subject + email_timestamp
-                    email_container.innerHTML = button_to_archive_or_unarchive
-                    email_container.className += ' background-gray '
-                } else if(mailbox === 'sent') {
-                    email_div.innerHTML = email_subject + email_recipients + email_timestamp
-                } else if(mailbox === 'archive') {
-                    email_div.innerHTML = email_sender + email_subject + email_timestamp
-                    email_container.innerHTML = button_to_archive_or_unarchive
-                }
-
-                email_container.id = 'email_container_id_' + email.id
-                email_container.className += ' col-12 mt-2 main_email_div card email_container '
-
-                email_container.append(email_div)
-                main_div.append(email_container)
-
+                let row = create_email_main_row(mailbox, email)
+                main_div.append(row)
             })
 
-            let emails_view = document.querySelector('#emails-view')
-            emails_view.append(main_div)
-
+            document.querySelector('#emails-view').append(main_div)
         });
 }
 
-function create_button_to_archive_or_unarchive(email) {
-        let button_text = email.archived ? 'Send to Inbox' : 'Send to Archive'
+function create_email_main_row(mailbox, email) {
 
-        return '<div class="text-right">'
-            + '<button class="btn btn-info" onclick="make_email_archived_unarchived(' + email.id + ',' + email.archived + ')">'
-            + button_text + '</button></div>'
+    let email_row = create_email_row()
+    let email_div = create_email_div(email)
+    let email_sender = crete_email_sender_column(email)
+    let email_subject = create_email_subject_column(email)
+    let email_timestamp = create_email_timestamp_column(email)
+    let email_recipients = create_email_recipients_column(email)
+    let button_to_archive_or_unarchive = create_button_to_archive_or_unarchive(email)
+
+    if (mailbox === 'inbox') {
+        email_div.className += ' col-10 row '
+        button_to_archive_or_unarchive.className = ' col-2 '
+        email_row.className += email.read ? ' background-gray ' : ''
+
+        email_div.append(email_sender)
+        email_div.append(email_subject)
+        email_div.append(email_timestamp)
+        email_row.append(email_div)
+        email_row.append(button_to_archive_or_unarchive)
+
+    } else if(mailbox === 'sent') {
+        email_timestamp.style.justifyContent = ' flex-end '
+        email_div.className = ' col-12 row '
+
+        email_div.append(email_subject)
+        email_div.append(email_recipients)
+        email_div.append(email_timestamp)
+        email_row.append(email_div)
+    } else if(mailbox === 'archive') {
+        email_timestamp.className = ' text-right '
+        email_div.className = ' col-10 row '
+        button_to_archive_or_unarchive.className = ' col-2 '
+
+        email_div.append(email_sender)
+        email_div.append(email_subject)
+        email_div.append(email_timestamp)
+        email_row.append(email_div)
+        email_row.append(button_to_archive_or_unarchive)
+    }
+
+    return email_row
 }
 
 function get_single_email(email_id) {
@@ -175,4 +181,67 @@ function reply_to_email(email) {
     document.querySelector('#compose-recipients').value = email.sender;
     document.querySelector('#compose-subject').value = subject;
     document.querySelector('#compose-body').value = body;
+}
+
+function create_email_row() {
+    let email_row = document.createElement('div')
+    email_row.className = ' row email-row '
+
+    return email_row
+}
+
+function create_email_div(email) {
+    let email_div = document.createElement('div')
+    // email_div.className = ' row email-data-div '
+    email_div.setAttribute('onclick', 'get_single_email(' + email.id + ')')
+
+    return email_div
+}
+
+function crete_email_sender_column(email) {
+    let email_sender = document.createElement('div')
+    email_sender.innerHTML = email.sender
+    email_sender.className = ' col-4 email-column '
+
+    return email_sender
+}
+
+function create_email_subject_column(email) {
+    let email_subject = document.createElement('div')
+    email_subject.innerHTML = email.subject
+    email_subject.className = ' col-4 email-column '
+
+    return email_subject
+}
+
+function create_email_timestamp_column(email) {
+    let email_timestamp = document.createElement('div')
+    email_timestamp.innerHTML = email.timestamp
+    email_timestamp.className = ' col-4 email-column text-right '
+
+    return email_timestamp
+}
+
+function create_email_recipients_column(email) {
+    let email_recipients = document.createElement('div')
+    email_recipients.innerHTML = email.recipients
+    email_recipients.className = ' col-4 email-column '
+
+    return email_recipients
+}
+
+function create_button_to_archive_or_unarchive(email) {
+    let button_text = email.archived ? 'Send to Inbox' : 'Send to Archive'
+
+    let button_div = document.createElement('div')
+    let button = document.createElement('button')
+
+    button.innerHTML = button_text
+    button_div.append(button)
+
+    button_div.className = ' text-right col-3 '
+    button.className = ' btn btn-info '
+    button.setAttribute('onclick', 'make_email_archived_unarchived(' + email.id + ',' + email.archived + ')')
+
+    return button_div
 }

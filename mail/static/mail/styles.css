@@ -11,6 +11,18 @@ textarea {
     background: gray;
 }
 
-.email_container:hover {
+.email-row {
+    margin: 5px 0 5px 0;
+    padding: 5px 0 5px 0;
+    border: 1px solid black;
+}
+
+.email-row:hover {
+    background: beige;
     cursor: pointer;
+}
+
+.email-column {
+    display: flex;
+    align-items: center;
 }
