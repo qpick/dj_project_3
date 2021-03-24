@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 
   document.querySelector('#submit-compose-form').addEventListener('click', (e) => {
-    e.preventDefault();
-    send_email()
-})
+      e.preventDefault();
+      send_email()
+  })
 
 });
 
@@ -124,11 +124,15 @@ function get_single_email(email_id) {
             document.querySelector('#emails-view').style.display = 'none';
             document.querySelector('#display-email').style.display = 'block';
 
-            document.querySelector('#display-email-sender').innerHTML = 'From ' + email.sender
-            document.querySelector('#display-email-recipients').innerHTML = 'To ' + email.recipients
-            document.querySelector('#display-email-subject').innerHTML = 'Subject: ' + email.subject
-            document.querySelector('#display-email-timestamp').innerHTML = 'Date: ' + email.timestamp
+            document.querySelector('#display-email-sender').innerHTML = '<b>From</b> ' + email.sender
+            document.querySelector('#display-email-recipients').innerHTML = '<b>To</b> ' + email.recipients
+            document.querySelector('#display-email-subject').innerHTML = '<b>Subject:</b> ' + email.subject
+            document.querySelector('#display-email-timestamp').innerHTML = '<b>Timestamp:</b> ' + email.timestamp
             document.querySelector('#display-email-body').innerHTML = email.body
+
+            document.querySelector('#reply-to-email-button').addEventListener('click', (e) => {
+                reply_to_email(email)
+            })
         });
 }
 
@@ -154,4 +158,21 @@ function make_email_archived_unarchived(email_id, archived) {
             load_mailbox('inbox')
       })
 
+}
+
+function reply_to_email(email) {
+    console.log('reply_to_email here')
+    console.log('email is: ', email)
+
+      // Show compose view and hide other views
+    document.querySelector('#emails-view').style.display = 'none';
+    document.querySelector('#display-email').style.display = 'none';
+    document.querySelector('#compose-view').style.display = 'block';
+
+    let subject = email.subject.substring(0, 4) === 'Re: ' ? email.subject : 'Re: ' + email.subject
+    let body = '"On ' + email.timestamp + ' ' + email.sender + ' wrote:" ' + '\n' + email.body
+
+    document.querySelector('#compose-recipients').value = email.sender;
+    document.querySelector('#compose-subject').value = subject;
+    document.querySelector('#compose-body').value = body;
 }
