@@ -84,18 +84,17 @@ function create_email_main_row(mailbox, email) {
     let email_subject = create_email_subject_column(email)
     let email_timestamp = create_email_timestamp_column(email)
     let email_recipients = create_email_recipients_column(email)
-    let button_to_archive_or_unarchive = create_button_to_archive_or_unarchive(email)
 
     if (mailbox === 'inbox') {
         email_div.className += ' col-10 row '
-        button_to_archive_or_unarchive.className = ' col-2 '
         email_row.className += email.read ? ' background-gray ' : ''
+        let button_to_archive = create_button_to_archive(email)
 
         email_div.append(email_sender)
         email_div.append(email_subject)
         email_div.append(email_timestamp)
         email_row.append(email_div)
-        email_row.append(button_to_archive_or_unarchive)
+        email_row.append(button_to_archive)
 
     } else if(mailbox === 'sent') {
         email_timestamp.style.justifyContent = ' flex-end '
@@ -106,15 +105,15 @@ function create_email_main_row(mailbox, email) {
         email_div.append(email_timestamp)
         email_row.append(email_div)
     } else if(mailbox === 'archive') {
+        let button_to_unarchive = create_button_to_unarchive(email)
         email_timestamp.className = ' text-right '
         email_div.className = ' col-10 row '
-        button_to_archive_or_unarchive.className = ' col-2 '
 
         email_div.append(email_sender)
         email_div.append(email_subject)
         email_div.append(email_timestamp)
         email_row.append(email_div)
-        email_row.append(button_to_archive_or_unarchive)
+        email_row.append(button_to_unarchive)
     }
 
     return email_row
@@ -152,12 +151,26 @@ function make_email_read(email_id) {
     })
 }
 
-function make_email_archived_unarchived(email_id, archived) {
+function make_email_archived(email_id) {
 
     fetch('/emails/' + email_id, {
         method: 'PUT',
         body: JSON.stringify({
-          archived: !archived
+          archived: true
+        })
+    })
+      .then(result => {
+            load_mailbox('inbox')
+      })
+
+}
+
+function make_email_unarchived(email_id) {
+
+    fetch('/emails/' + email_id, {
+        method: 'PUT',
+        body: JSON.stringify({
+          archived: false
         })
     })
       .then(result => {
@@ -230,18 +243,30 @@ function create_email_recipients_column(email) {
     return email_recipients
 }
 
-function create_button_to_archive_or_unarchive(email) {
-    let button_text = email.archived ? 'Send to Inbox' : 'Send to Archive'
-
+function create_button_to_archive(email) {
     let button_div = document.createElement('div')
     let button = document.createElement('button')
 
-    button.innerHTML = button_text
+    button.innerHTML = 'Send to Archive'
     button_div.append(button)
 
-    button_div.className = ' text-right col-3 '
+    button_div.className = ' text-right col-2 '
     button.className = ' btn btn-info '
-    button.setAttribute('onclick', 'make_email_archived_unarchived(' + email.id + ',' + email.archived + ')')
+    button.setAttribute('onclick', 'make_email_archived(' + email.id + ')')
+
+    return button_div
+}
+
+function create_button_to_unarchive(email) {
+    let button_div = document.createElement('div')
+    let button = document.createElement('button')
+
+    button.innerHTML = 'Send to Inbox'
+    button_div.append(button)
+
+    button_div.className = ' text-right col-2 '
+    button.className = ' btn btn-info '
+    button.setAttribute('onclick', 'make_email_unarchived(' + email.id + ')')
 
     return button_div
 }
