@@ -1,3 +1,28 @@
 textarea {
     min-height: 400px;
 }
+
+.main_email_div a {
+    text-decoration: none;
+    color: rgb(33, 37, 41);
+}
+
+.background-gray {
+    background: gray;
+}
+
+.email-row {
+    margin: 5px 0 5px 0;
+    padding: 5px 0 5px 0;
+    border: 1px solid black;
+}
+
+.email-row:hover {
+    background: beige;
+    cursor: pointer;
+}
+
+.email-column {
+    display: flex;
+    align-items: center;
+}
