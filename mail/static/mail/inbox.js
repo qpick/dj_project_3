@@ -129,10 +129,10 @@ function get_single_email(email_id) {
             document.querySelector('#emails-view').style.display = 'none';
             document.querySelector('#display-email').style.display = 'block';
 
-            document.querySelector('#display-email-sender').innerHTML = '<b>From</b> ' + email.sender
-            document.querySelector('#display-email-recipients').innerHTML = '<b>To</b> ' + email.recipients
-            document.querySelector('#display-email-subject').innerHTML = '<b>Subject:</b> ' + email.subject
-            document.querySelector('#display-email-timestamp').innerHTML = '<b>Timestamp:</b> ' + email.timestamp
+            document.querySelector('#display-email-sender').innerHTML +=  email.sender
+            document.querySelector('#display-email-recipients').innerHTML += email.recipients
+            document.querySelector('#display-email-subject').innerHTML += email.subject
+            document.querySelector('#display-email-timestamp').innerHTML += email.timestamp
             document.querySelector('#display-email-body').innerHTML = email.body
 
             document.querySelector('#reply-to-email-button').addEventListener('click', (e) => {
