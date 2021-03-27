@@ -19,9 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function compose_email() {
 
   // Show compose view and hide other views
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#display-email').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'block';
+  select_tab('compose-view')
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -29,12 +27,22 @@ function compose_email() {
   document.querySelector('#compose-body').value = '';
 }
 
+function select_tab(show_tab) {
+    const app_tabs = ['compose-view', 'display-email', 'emails-view']
+
+    app_tabs.forEach(tab => {
+        if (show_tab === tab) {
+            document.querySelector('#' + tab).style.display = 'block'
+            console.log('show_tab is: ', show_tab)
+        } else {
+            document.querySelector('#' + tab).style.display = 'none'
+            document.querySelector('#' + tab).style.display = 'none'
+        }
+    })
+}
+
 function load_mailbox(mailbox) {
-  
-  // Show the mailbox and hide other views
-  document.querySelector('#emails-view').style.display = 'block';
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#display-email').style.display = 'none';
+  select_tab('emails-view')
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -78,45 +86,43 @@ function get_emails_for_mailbox(mailbox) {
 
 function create_email_main_row(mailbox, email) {
 
-    let email_row = create_email_row()
-    let email_div = create_email_div(email)
-    let email_sender = crete_email_sender_column(email)
-    let email_subject = create_email_subject_column(email)
-    let email_timestamp = create_email_timestamp_column(email)
-    let email_recipients = create_email_recipients_column(email)
+    const email_row = create_email_row()
+    const email_div = create_email_div(email)
+    const email_sender = crete_email_sender_column(email)
+    const email_subject = create_email_subject_column(email)
+    const email_timestamp = create_email_timestamp_column(email)
+    const email_recipients = create_email_recipients_column(email)
 
     if (mailbox === 'inbox') {
         email_div.className += ' col-10 row '
         email_row.className += email.read ? ' background-gray ' : ''
-        let button_to_archive = create_button_to_archive(email)
+        const button_to_archive = create_button_to_archive(email)
 
-        email_div.append(email_sender)
-        email_div.append(email_subject)
-        email_div.append(email_timestamp)
-        email_row.append(email_div)
-        email_row.append(button_to_archive)
-
+        append_to_element(email_div, [email_sender, email_subject, email_timestamp])
+        append_to_element(email_row, [email_div, button_to_archive])
     } else if(mailbox === 'sent') {
         email_timestamp.style.justifyContent = ' flex-end '
         email_div.className = ' col-12 row '
 
-        email_div.append(email_subject)
-        email_div.append(email_recipients)
-        email_div.append(email_timestamp)
+        append_to_element(email_div, [email_subject, email_recipients, email_timestamp])
         email_row.append(email_div)
     } else if(mailbox === 'archive') {
-        let button_to_unarchive = create_button_to_unarchive(email)
+        const button_to_unarchive = create_button_to_unarchive(email)
         email_timestamp.className = ' text-right '
         email_div.className = ' col-10 row '
 
-        email_div.append(email_sender)
-        email_div.append(email_subject)
-        email_div.append(email_timestamp)
-        email_row.append(email_div)
-        email_row.append(button_to_unarchive)
+        append_to_element(email_div, [email_subject, email_sender, email_timestamp])
+        append_to_element(email_row, [email_div, button_to_unarchive])
     }
 
     return email_row
+}
+
+function append_to_element(element, array_of_elements) {
+    array_of_elements.forEach(array_element => {
+        element.append(array_element)
+    })
+    return element
 }
 
 function get_single_email(email_id) {
@@ -125,9 +131,7 @@ function get_single_email(email_id) {
         .then(response => response.json())
         .then(email => {
             make_email_read(email_id)
-
-            document.querySelector('#emails-view').style.display = 'none';
-            document.querySelector('#display-email').style.display = 'block';
+            select_tab('display-email')
 
             document.querySelector('#display-email-sender').innerHTML =  email.sender
             document.querySelector('#display-email-recipients').innerHTML = email.recipients
@@ -181,13 +185,11 @@ function make_email_unarchived(email_id) {
 
 function reply_to_email(email) {
 
-      // Show compose view and hide other views
-    document.querySelector('#emails-view').style.display = 'none';
-    document.querySelector('#display-email').style.display = 'none';
-    document.querySelector('#compose-view').style.display = 'block';
+    // Show compose view and hide other views
+    select_tab('compose-view')
 
-    let subject = email.subject.substring(0, 4) === 'Re: ' ? email.subject : 'Re: ' + email.subject
-    let body = '"On ' + email.timestamp + ' ' + email.sender + ' wrote:" ' + '\n' + email.body
+    const subject = email.subject.substring(0, 4) === 'Re: ' ? email.subject : 'Re: ' + email.subject
+    const body = '"On ' + email.timestamp + ' ' + email.sender + ' wrote: ' + '\n' + email.body + '"'
 
     document.querySelector('#compose-recipients').value = email.sender;
     document.querySelector('#compose-subject').value = subject;
@@ -195,22 +197,21 @@ function reply_to_email(email) {
 }
 
 function create_email_row() {
-    let email_row = document.createElement('div')
+    const email_row = document.createElement('div')
     email_row.className = ' row email-row '
 
     return email_row
 }
 
 function create_email_div(email) {
-    let email_div = document.createElement('div')
-    // email_div.className = ' row email-data-div '
+    const email_div = document.createElement('div')
     email_div.setAttribute('onclick', 'get_single_email(' + email.id + ')')
 
     return email_div
 }
 
 function crete_email_sender_column(email) {
-    let email_sender = document.createElement('div')
+    const email_sender = document.createElement('div')
     email_sender.innerHTML = email.sender
     email_sender.className = ' col-4 email-column '
 
@@ -218,7 +219,7 @@ function crete_email_sender_column(email) {
 }
 
 function create_email_subject_column(email) {
-    let email_subject = document.createElement('div')
+    const email_subject = document.createElement('div')
     email_subject.innerHTML = email.subject
     email_subject.className = ' col-4 email-column '
 
@@ -226,7 +227,7 @@ function create_email_subject_column(email) {
 }
 
 function create_email_timestamp_column(email) {
-    let email_timestamp = document.createElement('div')
+    const email_timestamp = document.createElement('div')
     email_timestamp.innerHTML = email.timestamp
     email_timestamp.className = ' col-4 email-column text-right '
 
@@ -234,7 +235,7 @@ function create_email_timestamp_column(email) {
 }
 
 function create_email_recipients_column(email) {
-    let email_recipients = document.createElement('div')
+    const email_recipients = document.createElement('div')
     email_recipients.innerHTML = email.recipients
     email_recipients.className = ' col-4 email-column '
 
@@ -242,8 +243,8 @@ function create_email_recipients_column(email) {
 }
 
 function create_button_to_archive(email) {
-    let button_div = document.createElement('div')
-    let button = document.createElement('button')
+    const button_div = document.createElement('div')
+    const button = document.createElement('button')
 
     button.innerHTML = 'Send to Archive'
     button_div.append(button)
@@ -256,8 +257,8 @@ function create_button_to_archive(email) {
 }
 
 function create_button_to_unarchive(email) {
-    let button_div = document.createElement('div')
-    let button = document.createElement('button')
+    const button_div = document.createElement('div')
+    const button = document.createElement('button')
 
     button.innerHTML = 'Send to Inbox'
     button_div.append(button)
